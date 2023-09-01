@@ -1,5 +1,28 @@
+import supabase from '@/lib/supabase/supabase-browser';
+import { useRouter } from 'next/navigation'
+import { useForm } from "react-hook-form";
+
+interface User {
+  email: string
+  password: string
+}
+
 
 export default function SignUp() {
+  const router = useRouter();
+  const { register, formState: { errors }, handleSubmit } = useForm<User>();
+
+  const handleSignUp = async (data: User) => {
+    await supabase.auth.signUp({
+      email: data.email,
+      password: data.password,
+      options: {
+        emailRedirectTo: `${location.origin}/auth/callback`,
+      },
+    })
+    router.refresh()
+  }
+  
     return (
       <div>
         <div className="sm:mx-auto sm:w-full sm:max-w-sm">
@@ -9,7 +32,7 @@ export default function SignUp() {
         </div>
 
         <div className="mt-10 sm:mx-auto sm:w-full sm:max-w-sm">
-          <form className="space-y-6" action="#" method="POST">
+          <form className="space-y-6" onSubmit={handleSubmit(handleSignUp)}>
             <div>
               <label htmlFor="email" className="block text-sm font-medium leading-6 text-white">
                 Nome
@@ -31,14 +54,15 @@ export default function SignUp() {
                 Email
               </label>
               <div className="mt-2">
-                <input
+              <input
+                {...register("email", { required: "Email Address is required" })} aria-invalid={errors.email ? "true" : "false"} 
                   id="email"
                   name="email"
                   type="email"
                   autoComplete="email"
-                  required
                   className="block w-full rounded-md border-0 py-1.5 px-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
                 />
+                {errors.email && <p role="alert">{String(errors.email?.message)}</p>}
               </div>
             </div>
 
@@ -49,7 +73,8 @@ export default function SignUp() {
                 </label>
               </div>
               <div className="mt-2">
-                <input
+              <input
+                {...register("password", { required: "Password is required" })} aria-invalid={errors.password ? "true" : "false"}
                   id="password"
                   name="password"
                   type="password"
@@ -57,6 +82,7 @@ export default function SignUp() {
                   required
                   className="block w-full rounded-md border-0 py-1.5 px-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
                 />
+                  {errors.password && <p role="alert">{String(errors.password?.message)}</p>}
               </div>
             </div>
 
