@@ -1,8 +1,11 @@
+'use client'
 import supabase from '@/lib/supabase/supabase-browser';
 import { useRouter } from 'next/navigation'
 import { useForm } from "react-hook-form";
 
 interface User {
+  name: string,
+  photoUrl: string,
   email: string
   password: string
 }
@@ -13,18 +16,20 @@ export default function SignUp() {
   const { register, formState: { errors }, handleSubmit } = useForm<User>();
 
   const handleSignUp = async (data: User) => {
-    await supabase.auth.signUp({
-      email: data.email,
-      password: data.password,
+    const {name, email, password} = data;
+    const dataUser = (await supabase.auth.signUp({
+      email: email,
+      password: password,
       options: {
         emailRedirectTo: `${location.origin}/auth/callback`,
       },
-    })
-    router.refresh()
+    })).data;
+    await supabase.from('profiles').insert({id: dataUser.user?.id, name, email, photoUrl: ''});
+    router.refresh();
   }
   
     return (
-      <div>
+      <>
         <div className="sm:mx-auto sm:w-full sm:max-w-sm">
           <h2 className="mt-10 text-center text-2xl font-bold leading-9 tracking-tight text-white">
             Cadastrar conta
@@ -43,7 +48,6 @@ export default function SignUp() {
                   name="name"
                   type="name"
                   autoComplete="name"
-                  required
                   className="block w-full rounded-md border-0 py-1.5 px-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
                 />
               </div>
@@ -96,6 +100,6 @@ export default function SignUp() {
             </div>
           </form>
         </div>
-      </div>
+      </>
     );
 }

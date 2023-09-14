@@ -13,18 +13,18 @@ export default function SignIn() {
   const { register, formState: { errors }, handleSubmit } = useForm<User>();
 
   const handleSignIn = async (data: User) => {
-    console.log(data);
-    if(data.email && data.password) {
+    const {email, password} = data;
+    if(email && password) {
       await supabase.auth.signInWithPassword({
-        email: data.email,
-        password: data.password,
+        email: email,
+        password: password,
       })
       router.refresh()
     }
   }
 
     return (
-      <div>
+      <>
         <div className="sm:mx-auto sm:w-full sm:max-w-sm">
           <h2 className="mt-10 text-center text-2xl font-bold leading-9 tracking-tight text-white">
             Entrar na minha conta
@@ -85,6 +85,6 @@ export default function SignIn() {
             </div>
           </form>
         </div>
-      </div>
+      </>
     );
 }

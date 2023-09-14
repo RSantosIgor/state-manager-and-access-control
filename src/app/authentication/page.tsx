@@ -11,7 +11,6 @@ export const metadata: Metadata = {
 
 export default function AuthenticationPage() {
   const [isSignIn, setIsSignIn] = useState(true);
-  
   const toogleSign = () => {
     setIsSignIn(!isSignIn);
   }
