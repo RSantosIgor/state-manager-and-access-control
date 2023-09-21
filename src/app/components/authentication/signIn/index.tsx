@@ -15,11 +15,15 @@ export default function SignIn() {
   const handleSignIn = async (data: User) => {
     const {email, password} = data;
     if(email && password) {
-      await supabase.auth.signInWithPassword({
-        email: email,
-        password: password,
+      fetch('/api/auth/sign-in', {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({email, password}),
       })
-      router.refresh()
+      .then(res => console.log(res))
+      .catch(error => console.error(error));
     }
   }
 

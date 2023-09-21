@@ -17,15 +17,15 @@ export default function SignUp() {
 
   const handleSignUp = async (data: User) => {
     const {name, email, password} = data;
-    const dataUser = (await supabase.auth.signUp({
-      email: email,
-      password: password,
-      options: {
-        emailRedirectTo: `${location.origin}/auth/callback`,
+    fetch('/api/auth/sign-up', {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
       },
-    })).data;
-    await supabase.from('profiles').insert({id: dataUser.user?.id, name, email, photoUrl: ''});
-    router.refresh();
+      body: JSON.stringify({name, email, password, photo_url: ''}),
+    })
+    .then(async res => console.log(await res.text()))
+    .catch(error => console.error(error));
   }
   
     return (
@@ -44,6 +44,7 @@ export default function SignUp() {
               </label>
               <div className="mt-2">
                 <input
+                {...register("name", { required: "Name is required" })} aria-invalid={errors.name ? "true" : "false"}
                   id="name"
                   name="name"
                   type="name"

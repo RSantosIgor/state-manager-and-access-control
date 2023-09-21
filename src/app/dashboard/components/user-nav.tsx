@@ -20,8 +20,15 @@ import { useRouter } from 'next/navigation'
     const router = useRouter();
 
     const handleLogout = async () => {
-      await supabase.auth.signOut();
-      router.refresh();
+      fetch('/api/auth/sign-out', {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({}),
+      });
+/*       await supabase.auth.signOut();
+      router.refresh(); */
     }
 
     return (
