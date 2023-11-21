@@ -22,7 +22,7 @@ export default function SignIn() {
         },
         body: JSON.stringify({email, password}),
       })
-      .then(res => console.log(res))
+      .then(async res => console.log(await res.json()))
       .catch(error => console.error(error));
     }
   }

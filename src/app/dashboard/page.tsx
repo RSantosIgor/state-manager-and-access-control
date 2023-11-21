@@ -1,10 +1,4 @@
-import { Metadata } from "next";
-
-export const metadata: Metadata = {
-  title: "Dashboard"
-}
-
-export default function Dashboard() {
-
-  return <>Hello world</>
+import { redirect } from 'next/navigation';
+export default function Home({}) {
+  redirect('/dashboard/default');
 }

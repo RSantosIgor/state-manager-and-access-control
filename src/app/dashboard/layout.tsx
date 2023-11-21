@@ -1,43 +1,45 @@
-import Image from "next/image"
-import { MainNav } from "@/app/dashboard/components/main-nav";
-import { UserNav } from "@/app/dashboard/components/user-nav";;
+'use client'
+import routes from '@/routes';
+import { usePathname } from 'next/navigation';
+import React, { useState } from 'react';
+import Sidebar from './components/SideBar';
+import Navbar from './components/NavBar';
+import { getActiveNavbar, getActiveRoute } from '@/util/navigation';
 
+const Layout = ({ children } : { children: React.ReactNode}) => {
+  const [open, setOpen] = useState(false);
+  const pathname = usePathname();
 
-export default function DashboardLayout({
-  children,
-}: {
-  children: React.ReactNode
-}) {
   return (
-    <>
-        <div className="md:hidden">
-    {/* <Image
-            src="/examples/dashboard-light.png"
-            width={1280}
-            height={866}
-            alt="Dashboard"
-            className="block dark:hidden"
+    <div className="flex justify-between h-full w-full bg-background-100 dark:bg-background-900">
+      <div>
+        <Sidebar routes={routes} open={open} setOpen={setOpen} variant="admin"/>
+      </div>
+      {/* Navbar & Main Content */}
+      <div className="h-full font-dm dark:bg-navy-900">
+        {/* Main Content */}
+        <main
+          className={`mx-2.5  flex-none transition-all dark:bg-navy-900 
+              md:pr-2 xl:ml-[323px]`}
+        >
+          {/* Routes */}
+          <div>
+            <Navbar
+              onOpenSidenav={() => setOpen(!open)}
+              brandText={getActiveRoute(routes, pathname)}
+              secondary={getActiveNavbar(routes, pathname)}
             />
-            <Image
-            src="/examples/dashboard-dark.png"
-            width={1280}
-            height={866}
-            alt="Dashboard"
-            className="hidden dark:block"
-            /> */}
-        </div>
-        <div className="hidden flex-col md:flex">
-            <div className="border-b">
-            <div className="flex h-16 items-center px-4">
-                <MainNav className="mx-6" />
-                <div className="ml-auto flex items-center space-x-4">
-                <UserNav />
-                </div>
+            <div className="mx-auto min-h-screen p-2 !pt-[10px] md:p-2">
+              {children}
             </div>
-            </div>
-            {children}
-        </div>
-    </>
-  )
-}
+{/*         <div className="p-3">
+              <Footer />
+            </div> */}
+          </div>
+        </main>
+      </div>
+    </div>
+  );
+};
 
+export default Layout;

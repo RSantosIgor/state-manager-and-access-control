@@ -1,5 +1,4 @@
 'use client'
-import supabase from '@/lib/supabase/supabase-browser';
 import { useRouter } from 'next/navigation'
 import { useForm } from "react-hook-form";
 
@@ -24,7 +23,7 @@ export default function SignUp() {
       },
       body: JSON.stringify({name, email, password, photo_url: ''}),
     })
-    .then(async res => console.log(await res.text()))
+    .then(async res => console.log(await res.json()))
     .catch(error => console.error(error));
   }
   
