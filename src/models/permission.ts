@@ -3,58 +3,58 @@ import { Permission } from "@/types/permission";
 
 const TABLE = 'permissions';
 
-export const create = (data: Permission) => {
+export const create = (data: Permission, supabaseClient: any = undefined) => {
     try {
         //Todo: Future - Check if user exists
-        return db.create(TABLE, data);
+        return db.create(TABLE, data, supabaseClient);
     } catch (error) {
         return Promise.reject(error);
     }
 }
 
-export const getAll = () => {
+export const getAll = (supabaseClient: any = undefined) => {
     try {
-        return db.get(TABLE);
+        return db.get(TABLE, supabaseClient);
     } catch (error) {
         return Promise.reject(error);
     }
 }
 
-export const getById = (id: number) => {
+export const getById = (id: number, supabaseClient: any = undefined) => {
     try {
-        return db.getBy(TABLE, id);
+        return db.getBy(TABLE, id, supabaseClient);
     } catch (error) {
         return Promise.reject(error);
     }
 }
 
-export const getByUser = (userId: string) => {
+export const getByUser = (userId: string, supabaseClient: any = undefined) => {
     try {
-        return db.getMatchAny(TABLE, {userId});
+        return db.getMatchAny(TABLE, {userId}, supabaseClient);
     } catch (error) {
         return Promise.reject(error);
     }
 }
 
-export const getByResource = (resourceId: number) => {
+export const getByResource = (resourceId: number, supabaseClient: any = undefined) => {
     try {
-        return db.getMatchAny(TABLE, {resourceId});
+        return db.getMatchAny(TABLE, {resourceId}, supabaseClient);
     } catch (error) {
         return Promise.reject(error);
     }
 }
 
-export const update = (id: number, data: any) => {
+export const update = (id: number, data: any, supabaseClient: any = undefined) => {
     try {
-        return db.update(TABLE, id, data);
+        return db.update(TABLE, id, data, supabaseClient);
     } catch (error) {
         return Promise.reject(error);
     }
 }
 
-export const remove = (id: number) => {
+export const remove = (id: number, supabaseClient: any = undefined) => {
     try {
-      return db.remove(TABLE, id);
+      return db.remove(TABLE, id, supabaseClient);
     } catch (error) {
         return Promise.reject(error);
     }
@@ -62,7 +62,7 @@ export const remove = (id: number) => {
 
 export const factory = (data: any) => {
     const permission: Permission = {
-        createdAt: data.createdAt || new Date().getTime(),
+        created_at: data.created_at || new Date().getTime(),
         userId: data.userId,
         resourceId: data.resourceId,
         role: data.role

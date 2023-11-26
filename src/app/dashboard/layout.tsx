@@ -1,14 +1,38 @@
 'use client'
 import routes from '@/routes';
-import { usePathname } from 'next/navigation';
-import React, { useState } from 'react';
+import { redirect, usePathname, useRouter } from 'next/navigation';
+import React, { useContext, useEffect, useState } from 'react';
 import Sidebar from './components/SideBar';
 import Navbar from './components/NavBar';
 import { getActiveNavbar, getActiveRoute } from '@/util/navigation';
+import { get } from '@/lib/localStorage/storage';
+import { user } from '@/models/auth';
 
 const Layout = ({ children } : { children: React.ReactNode}) => {
   const [open, setOpen] = useState(false);
   const pathname = usePathname();
+  const router = useRouter();
+
+  useEffect (()=> {
+    user()
+    .then(res => {
+      const isLoggedIn = Boolean(res.data.session);
+      middlewareAuth(pathname, isLoggedIn);
+    });
+  }, []);
+
+  const middlewareAuth = (path: string, isLoggedIn: boolean) => {
+    const layout = path.split('/')[1];
+    if (layout === 'dashboard' && !isLoggedIn) {
+      router.replace('/authentication');
+      //redirect('/authentication')
+        
+    } else if (layout === 'authentication' && isLoggedIn) {
+      router.replace('/dashboard');
+      //redirect('/dashboard')
+    }
+  }
+
 
   return (
     <div className="flex justify-between h-full w-full bg-background-100 dark:bg-background-900">

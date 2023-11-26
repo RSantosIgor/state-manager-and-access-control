@@ -12,8 +12,6 @@ export const Links = (props: { routes: RoutesType[] }): JSX.Element => {
   // verifies if routeName is the one active (in browser input)
   const activeRoute = useCallback(
     (routeName: string) => {
-      console.log(pathname);
-      console.log(routeName)
       return pathname?.includes(routeName);
     },
     [pathname],

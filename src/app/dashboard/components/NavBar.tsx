@@ -1,11 +1,17 @@
-import React, { useEffect } from 'react';
+import React, { useContext, useEffect } from 'react';
 import Dropdown from './Dropdown';
 import { FiAlignJustify } from 'react-icons/fi';
 import NavLink from './NavLink';
 import { FiSearch } from 'react-icons/fi';
 import { RiMoonFill, RiSunFill } from 'react-icons/ri';
-import avatar from '/public/img/avatars/avatar.jpg';
+import avatar from '/public/img/avatars/avatar.png';
 import Image from 'next/image';
+import { useRouter } from 'next/navigation';
+import { get, set } from '@/lib/localStorage/storage';
+import { Profile } from '@/types/profile';
+import { user } from '@/models/auth';
+import { factory, getById } from '@/models/profile';
+import Link from 'next/link';
 
 const Navbar = (props: {
   onOpenSidenav: () => void;
@@ -14,14 +20,43 @@ const Navbar = (props: {
   [x: string]: any;
 }) => {
   const { onOpenSidenav, brandText, mini, hovered } = props;
+  const [darkmode, setDarkmode] = React.useState(false);
+  const [profile, setProfile] = React.useState<Profile>({});
+  const [loading, setLoading] = React.useState(true);
+
   useEffect(() => {
     if (typeof document !== 'undefined') {
-      setDarkmode(document.body.classList.contains('dark'));
+      setDarkmode(isDark());
+      getSessionAndUser();
+      setLoading(false);
     }
   }, []);
-  const [darkmode, setDarkmode] = React.useState(false);
 
- return (
+  
+  const getSessionAndUser = async () => {
+    const dataSession = (await user());
+    const session = dataSession.data.session
+    if (session) {
+      const userId = `${session?.user.id}`;
+      const {data, error} = await getById(userId);  
+      if (data) {
+        const profileData = factory(data[0]);
+        setProfile(profileData);
+      }
+    }
+  };
+
+  const signOut = () => {
+    fetch('/api/auth/sign-out', { method: "POST"})
+    .then(async res => {
+      const {data, error} = await res.json();
+      if (data) {
+        //router.replace('/authentication');
+      }
+    }).catch(error => console.error(error));
+  
+  }
+ return ( !loading &&
     <nav className="sticky top-4 z-40 flex flex-row flex-wrap items-center justify-between rounded-xl bg-white/10 p-2 backdrop-blur-xl dark:bg-[#0b14374d]">
       <div className="ml-[6px]">
         <div className="h-6 w-[224px] pt-1">
@@ -29,7 +64,7 @@ const Navbar = (props: {
             className="text-sm font-normal text-navy-700 hover:underline dark:text-white dark:hover:text-white"
             href=" "
           >
-            Pages
+            Página
             <span className="mx-1 text-sm text-navy-700 hover:text-navy-700 dark:text-white">
               {' '}
               /{' '}
@@ -73,10 +108,10 @@ const Navbar = (props: {
           className="cursor-pointer text-gray-600"
           onClick={() => {
             if (darkmode) {
-              document.body.classList.remove('dark');
+              toggleTheme();
               setDarkmode(false);
             } else {
-              document.body.classList.add('dark');
+              toggleTheme();
               setDarkmode(true);
             }
           }}
@@ -94,44 +129,33 @@ const Navbar = (props: {
               width="20"
               height="20"
               className="h-10 w-10 rounded-full"
-              src={avatar}
+              src={`https://picsum.photos/seed/${profile.first_name}/200/300`}
               alt="Avatar"
             />
           }
           classNames={'py-2 top-8 -left-[180px] w-max'}
         >
-          <div className="flex h-48 w-56 flex-col justify-start rounded-[20px] bg-white bg-cover bg-no-repeat shadow-xl shadow-shadow-500 dark:!bg-navy-700 dark:text-white dark:shadow-none">
+          <div className="flex h-36 w-56 flex-col justify-start rounded-[20px] bg-white bg-cover bg-no-repeat shadow-xl shadow-shadow-500 dark:!bg-navy-700 dark:text-white dark:shadow-none">
             <div className="ml-4 mt-3">
               <div className="flex items-center gap-2">
                 <p className="text-sm font-bold text-navy-700 dark:text-white">
-                  👋 Olá, 
+                  Olá, 
                   <span>
-
+                      { ' '  + (profile.first_name) }
                   </span>
                 </p>{' '}
               </div>
             </div>
             <div className="mt-3 h-px w-full bg-gray-200 dark:bg-white/20 " />
 
-            <div className="ml-4 mt-3 flex flex-col">
-              <a
-                href=" "
-                className="text-sm text-gray-800 dark:text-white hover:dark:text-white"
-              >
-                Profile Settings
-              </a>
-              <a
-                href=" "
-                className="mt-3 text-sm text-gray-800 dark:text-white hover:dark:text-white"
-              >
-                Newsletter Settings
-              </a>
-              <a
-                href=" "
-                className="mt-3 text-sm font-medium text-red-500 hover:text-red-500"
-              >
-                Log Out
-              </a>
+            <div className="ml-4 mt-3 flex flex-col" 
+            onClick={signOut} >
+              <Link href={'/authentication'}>
+                <button
+                  className="mt-3 text-sm font-medium text-red-500 hover:text-red-500">
+                    Sair
+                </button>
+              </Link>
             </div>
           </div>
         </Dropdown>
@@ -140,4 +164,21 @@ const Navbar = (props: {
   );
 };
 
+ const toggleTheme = () => {
+  const theme = get('theme');
+  if(!theme || theme === 'light') {
+      document.body.classList.remove('dark');
+      set('theme', 'light');
+  } else {
+      document.body.classList.add('dark');
+      set('theme', 'dark');
+  }
+}
+
+const isDark = () => {
+  const theme = get('theme');
+  return (!theme || theme === 'light');
+}
+
 export default Navbar;
+

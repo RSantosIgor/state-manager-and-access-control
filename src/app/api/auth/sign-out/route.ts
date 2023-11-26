@@ -1,23 +1,22 @@
+import { signOut, user } from '@/models/auth';
+import { NextResponse } from 'next/server';
 import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs';
 import { cookies } from 'next/headers';
-import { NextResponse } from 'next/server';
-
 
 export const dynamic = 'force-dynamic';
 
 export async function POST(request: Request) {
   try {
-    const requestUrl = new URL(request.url);
-    const supabase = createRouteHandlerClient({ cookies });
-    const {data: { session }} = await supabase.auth.getSession();
+    const supabaseServer = createRouteHandlerClient({cookies});
+    const {data: { session }} = await user(supabaseServer);
   
     if (session) {
-      await supabase.auth.signOut();
+       const {error} = await signOut(supabaseServer);
+       if (error) throw new Error(error.message);
+       console.log('Error SignOut', error);
     }
 
-    return NextResponse.redirect(`${requestUrl.origin}/authentication`, {
-      status: 301
-    }); 
+    return NextResponse.json({message: 'success'})
   } catch (error) {
     return NextResponse.json({error}, {status: 500});
   }

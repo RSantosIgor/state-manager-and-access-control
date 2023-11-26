@@ -5,18 +5,18 @@ import { user } from '@/models/auth';
 
 const TABLE = 'resources';
 
-export const create = (data: Resource) => {
+export const create = (data: Resource, supabaseClient: any = undefined) => {
     try {
-        return db.create(TABLE, data)
+        return db.create(TABLE, data, supabaseClient)
         .then(async (response: any) => {
             const dataRes = response.data;
             if (data.level === 0) {
-                const userData = (await user).data.session?.user;
+                const userData = (await user(supabaseClient)).data.session?.user;
                 await permission.create(permission.factory({ 
                     resourceId: dataRes.id,
                     role: 'manager',
                     userId: userData?.id
-                }));
+                }), supabaseClient);
             }
         })
     } catch (error) {
@@ -24,41 +24,41 @@ export const create = (data: Resource) => {
     }
 }
 
-export const getAll = () => {
+export const getAll = (supabaseClient: any = undefined) => {
     try {
-        return db.get(TABLE);
+        return db.get(TABLE, supabaseClient);
     } catch (error) {
         return Promise.reject(error);
     }
 }
 
-export const getById = (id: number) => {
+export const getById = (id: number, supabaseClient: any = undefined) => {
     try {
-        return db.getBy(TABLE, id);
+        return db.getBy(TABLE, id, supabaseClient);
     } catch (error) {
         return Promise.reject(error);
     }
 }
 
-export const getByResourceTableId = (resourceTableId: number) => {
+export const getByResourceTableId = (resourceTableId: number, supabaseClient: any = undefined) => {
     try {
-        return db.getMatchAny(TABLE, {resourceTableId});
+        return db.getMatchAny(TABLE, {resourceTableId}, supabaseClient);
     } catch (error) {
         return Promise.reject(error);
     }
 }
 
-export const update = (id: number, data: Resource) => {
+export const update = (id: number, data: Resource, supabaseClient: any = undefined) => {
     try {
-        return db.update(TABLE, id, data);
+        return db.update(TABLE, id, data, supabaseClient);
     } catch (error) {
         return Promise.reject(error);
     }
 }
 
-export const remove = (id: number) => {
+export const remove = (id: number, supabaseClient: any = undefined) => {
     try {
-      return db.remove(TABLE, id);
+      return db.remove(TABLE, id, supabaseClient);
     } catch (error) {
         return Promise.reject(error);
     }
@@ -66,7 +66,7 @@ export const remove = (id: number) => {
 
 export const factory = (data: any, fatherResource?: Resource) => {
     const resource: Resource = {
-        createdAt: data.createdAt || new Date().getTime(),
+        created_at: data.created_at || new Date().getTime(),
         resourceTableId: data.resourceTableId,
         refTable: data.refTable,
         level: getLevel(fatherResource),

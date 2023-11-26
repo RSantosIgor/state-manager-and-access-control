@@ -1,4 +1,6 @@
 import { IRoute } from '@/types/navigation';
+import { RedirectType } from 'next/dist/client/components/redirect';
+import {redirect} from 'next/navigation';
 
 export const isWindowAvailable = () => typeof window !== 'undefined';
 
@@ -33,3 +35,13 @@ export const getActiveNavbarText = (
 ): string | boolean => {
   return getActiveRoute(routes, pathname) || false;
 };
+
+export const middlewareAuth = (path: string, isLoggedIn: boolean) => {
+  const layout = path.split('/')[1];
+  if (layout === 'dashboard' && !isLoggedIn) {
+    return redirect('/authentication')
+      
+  } else if (layout === 'authentication' && isLoggedIn) {
+    return redirect('/dashboard')
+  }
+}

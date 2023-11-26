@@ -1,7 +1,7 @@
 'use client';
 import './globals.css'
 import type { Metadata } from 'next'
-import React, { ReactNode } from 'react';
+import React from 'react';
 
 export const metadata: Metadata = {
   title: 'State manager and access control',
@@ -13,9 +13,13 @@ export default function RootLayout({
 }: {
   children: React.ReactNode
 }) {
+
   return (
     <html lang="en">
-      <body>{children}</body>
+      <body>
+        {children}
+      </body>
     </html>
   )
 }
+

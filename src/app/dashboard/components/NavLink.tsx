@@ -1,4 +1,5 @@
 'use client';
+import Link from 'next/link';
 import NextLink, { LinkProps as NextLinkProps } from 'next/link';
 import {
   useMemo,
@@ -14,9 +15,10 @@ function NavLink({ className, children, styles, borderRadius, ...props }: any) {
   );
 
   return (
-    <NextLink className={`${className}`} style={memoizedStyles} {...props}>
+    <Link
+     className={`${className}`} style={memoizedStyles} {...props}>
       {children}
-    </NextLink>
+    </Link>
   );
 }
 

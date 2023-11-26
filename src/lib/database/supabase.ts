@@ -1,9 +1,9 @@
 import { type SupabaseClient } from '@supabase/auth-helpers-nextjs';
-import supabase from '@/lib/supabase/supabase';
+import supabase from '@/lib/supabase/supabase-browser';
 
 const create = (table: string, data: any, database: SupabaseClient = supabase) => {
     try {
-       return database.from(table).insert({...data, createdAt: new Date().getTime()});
+       return database.from(table).insert({...data, created_at: new Date().getTime()});
     } catch (error) {
         return Promise.reject(error);
     }
@@ -35,7 +35,7 @@ const getMatchAny = (table: string, dataMatch: any, columns: string = '*', datab
 
 const update = (table: string, id: number | string, data: any, database: SupabaseClient = supabase) => {
   try {
-    database.from(table).update({...data, updatedAt: new Date().getTime()}).match({id});
+    database.from(table).update({...data, updated_at: new Date().getTime()}).match({id});
   } catch (error) {
       return Promise.reject(error);
   }
