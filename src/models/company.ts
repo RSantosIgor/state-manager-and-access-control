@@ -1,21 +1,27 @@
 import { Company } from "@/types/company";
 import db from "@/lib/database/supabase";
 import resource  from '@/models/resource';
-import { RefTable } from "@/types/resource";
+//import { RefTable } from "@/types/resource";
 
-const TABLE = RefTable.company;
+const TABLE = 'companies';
 
 export const create = (data: Company, supabaseClient: any = undefined) => {
     try {
-        return db.create(TABLE, data, supabaseClient)
+        const resourceData = resource.factory({ 
+            resource_table_id: data.id,
+            ref_table: TABLE
+        });
+
+        return resource.create(resourceData, supabaseClient)
         .then(async (response: any) => {
-            const data = response.data;
-            const resourceData = resource.factory({ 
-                resourceTableId: data.id,
-                refTable: RefTable.company
-            });
-            await resource.create(resourceData);
-            return data;
+            const resourceDoc = response.data[0];
+            const resource_id: number = resourceDoc.id;
+            return db.create(TABLE, {...data, resource_id}, supabaseClient);
+        })
+        .then(async (response: any) => {
+            const companyDoc = response.data[0];
+            await resource.update(companyDoc.resource_id, {resource_table_id: companyDoc.id}, supabaseClient);
+            return response; 
         });
     } catch (error) {
         return Promise.reject(error);
@@ -68,6 +74,11 @@ export const factory = (data: any) => {
         created_at: data.created_at || new Date().getTime(),
         name: data.name,
         description: data.description,
+        resource_id: data.resource_id
     }
     return company;
 }
+
+const functions = { create, getAll,  getById, getByResourceId, update, remove, factory };
+
+export default functions;

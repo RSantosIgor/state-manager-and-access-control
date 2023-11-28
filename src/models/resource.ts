@@ -9,15 +9,16 @@ export const create = (data: Resource, supabaseClient: any = undefined) => {
     try {
         return db.create(TABLE, data, supabaseClient)
         .then(async (response: any) => {
-            const dataRes = response.data;
+            const data = response.data[0];
             if (data.level === 0) {
                 const userData = (await user(supabaseClient)).data.session?.user;
                 await permission.create(permission.factory({ 
-                    resourceId: dataRes.id,
+                    resourceId: data.id,
                     role: 'manager',
                     userId: userData?.id
                 }), supabaseClient);
             }
+            return response;
         })
     } catch (error) {
         return Promise.reject(error);
@@ -48,7 +49,7 @@ export const getByResourceTableId = (resourceTableId: number, supabaseClient: an
     }
 }
 
-export const update = (id: number, data: Resource, supabaseClient: any = undefined) => {
+export const update = (id: number, data: any, supabaseClient: any = undefined) => {
     try {
         return db.update(TABLE, id, data, supabaseClient);
     } catch (error) {
@@ -67,8 +68,8 @@ export const remove = (id: number, supabaseClient: any = undefined) => {
 export const factory = (data: any, fatherResource?: Resource) => {
     const resource: Resource = {
         created_at: data.created_at || new Date().getTime(),
-        resourceTableId: data.resourceTableId,
-        refTable: data.refTable,
+        resource_table_id: data.resource_table_id,
+        ref_table: data.ref_table,
         level: getLevel(fatherResource),
 	    hierarchy: getHierarchy(fatherResource)
     }
@@ -79,7 +80,7 @@ const getHierarchy = (resource?: Resource): Hierarchy[] => {
     if (resource) {
         return [
             ...resource.hierarchy,
-            {resourceId: Number(resource.id), level: resource.level, label: resource.refTable}
+            {resource_id: Number(resource.id), level: resource.level, label: resource.ref_table}
         ];
     }
     return [];

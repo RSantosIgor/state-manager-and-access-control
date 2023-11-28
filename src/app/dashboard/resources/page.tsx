@@ -1,6 +1,12 @@
+'use client'
+/* eslint-disable react/no-children-prop */
 import { Metadata } from "next";
 import ButtonDropdown from "./components/buttonDropdown";
 import { Peoples } from "./components/peoples";
+import { useState } from "react";
+import BasicModal from "@/app/components/modal";
+import { NewResource } from "./components/newResource";
+import unit from "@/models/unit";
 
 export const metadata: Metadata = {
   title: "Resources"
@@ -8,14 +14,28 @@ export const metadata: Metadata = {
 
 export default function Resources() {
 
+  const [modalOpen, setModalOpen] = useState(false);
+  const [resourceType, setResourceType] = useState('company');
+  
+  const handleButton = (resourceType: string) => {
+      setResourceType(resourceType);
+      setModalOpen(!modalOpen);
+      unit.getAll();
+  }
+  
   return (
   <div className="w-100p h-full mt-3 flex flex-col gap-5">
+    <BasicModal 
+      open={modalOpen} 
+      setOpen={setModalOpen} 
+      children={<NewResource resourceType={resourceType} setOpen={setModalOpen}/>} 
+    />
     <div className="flex w-full justify-end">
-        <ButtonDropdown/>
+        <ButtonDropdown handleButton={handleButton}/>
     </div>
     <div className=" w-full sm:overflow-auto px-6 !z-5 relative flex flex-col rounded-[20px] bg-white bg-clip-border shadow-3xl shadow-shadow-500 dark:shadow-none dark:!bg-navy-800 dark:text-white">
       <header className="relative flex items-center justify-between pt-4">
-        <div className="text-xl font-bold text-navy-700 dark:text-whit">
+        <div className="text-xl font-bold text-navy-700 dark:text-white">
           <p>
             Empresa 1
           </p>

@@ -1,22 +1,28 @@
 import { Unit } from "@/types/unit";
 import db from "@/lib/database/supabase";
-import { RefTable, Resource } from "@/types/resource";
+import { Resource } from "@/types/resource";
 import resource from "@/models/resource";
 
-const TABLE = RefTable.unit;
+const TABLE = 'units';
 
 export const create = (data: Unit, fatherResource: Resource, supabaseClient: any = undefined) => {
     try {
-        return db.create(TABLE, data, supabaseClient)
-            .then(async (response: any) => {
-                const data = response.data;
-                const resourceData = resource.factory({ 
-                    resourceTableId: data.id,
-                    refTable: RefTable.unit
-                }, fatherResource);
-                await resource.create(resourceData, supabaseClient);
-                return data;
-            });
+        const resourceData = resource.factory({ 
+            resource_table_id: data.id,
+            ref_table: TABLE
+        }, fatherResource);
+
+        return resource.create(resourceData, supabaseClient)
+        .then(async (response: any) => {
+            const resourceDoc = response.data[0];
+            const resource_id: number = resourceDoc.id;
+            return db.create(TABLE, {...data, resource_id}, supabaseClient);
+        })
+        .then(async (response: any) => {
+            const unitDoc = response.data[0];
+            await resource.update(unitDoc.resource_id, {resource_table_id: unitDoc.id}, supabaseClient);
+            return response; 
+        });
     } catch (error) {
         return Promise.reject(error);
     }
@@ -67,7 +73,12 @@ export const factory = (data: any) => {
         id: data.id,
         created_at: data.created_at || new Date().getTime(),
         name: data.name,
-        description: data.description
+        description: data.description,
+        resource_id: data.resource_id 
     }
     return unit;
 }
+
+const functions = { create, getAll,  getById, getByResourceId, update, remove, factory };
+
+export default functions;

@@ -19,7 +19,7 @@ export const getById = (id: string, supabaseClient: any = undefined) => {
     }
 }
 
-export const update = (id: string, data: Profile, supabaseClient: any = undefined) => {
+export const update = (id: string, data: any, supabaseClient: any = undefined) => {
     try {
         return db.update(TABLE, id, data, supabaseClient);
     } catch (error) {

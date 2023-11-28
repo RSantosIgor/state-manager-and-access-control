@@ -63,8 +63,8 @@ export const remove = (id: number, supabaseClient: any = undefined) => {
 export const factory = (data: any) => {
     const permission: Permission = {
         created_at: data.created_at || new Date().getTime(),
-        userId: data.userId,
-        resourceId: data.resourceId,
+        user_id: data.user_id,
+        resource_id: data.resource_id,
         role: data.role
     }
     return permission;

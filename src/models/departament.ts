@@ -1,21 +1,27 @@
 import { Departament } from "@/types/departament";
 import db from "@/lib/database/supabase";
-import { RefTable, Resource } from "@/types/resource";
+import { Resource } from "@/types/resource";
 import resource from "@/models/resource";
 
-const TABLE = RefTable.departament;
+const TABLE = 'departaments';
 
 export const create = (data: Departament, fatherResource: Resource, supabaseClient: any = undefined) => {
     try {
-        return db.create(TABLE, data, supabaseClient)
+        const resourceData = resource.factory({ 
+            resource_table_id: data.id,
+            ref_table: TABLE
+        }, fatherResource);
+
+        return resource.create(resourceData, supabaseClient)
         .then(async (response: any) => {
-            const data = response.data;
-            const resourceData = resource.factory({ 
-                resourceTableId: data.id,
-                refTable: RefTable.departament
-            }, fatherResource);
-            await resource.create(resourceData);
-            return data
+            const resourceDoc = response.data[0];
+            const resource_id: number = resourceDoc.id;
+            return db.create(TABLE, {...data, resource_id}, supabaseClient);
+        })
+        .then(async (response: any) => {
+            const departamentDoc = response.data[0];
+            await resource.update(departamentDoc.resource_id, {resource_table_id: departamentDoc.id}, supabaseClient);
+            return response; 
         });
     } catch (error) {
         return Promise.reject(error);
@@ -67,7 +73,12 @@ export const factory = (data: any) => {
         id: data.id,
         created_at: data.created_at || new Date().getTime(),
         name: data.name,
-        description: data.description
+        description: data.description,
+        resource_id: data.resource_id
     }
     return departament;
 }
+
+const functions = { create, getAll,  getById, getByResourceId, update, remove, factory };
+
+export default functions;

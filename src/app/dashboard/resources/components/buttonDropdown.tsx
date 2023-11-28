@@ -1,13 +1,9 @@
 'use client'
 import React from "react";
 import Dropdown from "./dropdown";
-import { AiOutlineUser } from "react-icons/ai";
-import { FiSettings } from "react-icons/fi";
-import { AiOutlineShop } from "react-icons/ai";
-import { TiLightbulb } from "react-icons/ti";
 import { RiArrowDownSLine } from "react-icons/ri";
 
-function ButtonDropdown() {
+function ButtonDropdown({handleButton}: {handleButton: React.Dispatch<React.SetStateAction<any>>}) {
   const [open, setOpen] = React.useState(false);
   return (
     <Dropdown
@@ -24,14 +20,21 @@ function ButtonDropdown() {
       classNames="top-10 right-0 w-full"
       // eslint-disable-next-line react/no-children-prop
       children={
-        <div className="z-50 w-full rounded-xl py-3 px-3 text-sm shadow-xl shadow-shadow-500 bg-indigo-600">
-          <p className="bg-indigo-600 hover:bg-indigo-500 px-3 py-1.5 text-sm text-white rounded-md font-normal flex cursor-pointer items-center">
+        <div className="z-50 w-full rounded-xl py-3 px-3 text-sm shadow-xl shadow-shadow-500 bg-indigo-600"
+        >
+          <p className="bg-indigo-600 hover:bg-indigo-500 px-3 py-1.5 text-sm text-white rounded-md font-normal flex cursor-pointer items-center"
+            onClick={()=> handleButton('company')}
+          >
             Empresa
           </p>
-          <p className="bg-indigo-600 hover:bg-indigo-500 px-3 py-1.5 text-sm text-white rounded-md font-normal flex cursor-pointer items-center">
+          <p className="bg-indigo-600 hover:bg-indigo-500 px-3 py-1.5 text-sm text-white rounded-md font-normal flex cursor-pointer items-center"
+            onClick={()=> handleButton('unit')}
+          >
             Unidade
           </p>
-          <p className="bg-indigo-600 hover:bg-indigo-500 px-3 py-1.5 text-sm text-white rounded-md font-normal flex cursor-pointer items-center">
+          <p className="bg-indigo-600 hover:bg-indigo-500 px-3 py-1.5 text-sm text-white rounded-md font-normal flex cursor-pointer items-center"
+            onClick={()=> handleButton('departament')}
+          >
             Departamento
           </p>
         </div>
