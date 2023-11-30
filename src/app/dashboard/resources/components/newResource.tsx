@@ -2,12 +2,9 @@ import { useForm } from "react-hook-form";
 import companyModel from "@/models/company";
 import unitModel from "@/models/unit";
 import departamentModel from "@/models/departament";
-
-const models = {
-    company: companyModel,
-    unit: unitModel, 
-    departament: departamentModel
-}
+import { Resource, ResourceExtended } from "@/types/resource";
+import { NestedSelectOption } from "./nestedSelectOptions";
+import resourceModel from "@/models/resource";
 
 const resourceLabel: any = {
     company: 'Empresa',
@@ -16,17 +13,48 @@ const resourceLabel: any = {
 }
 
 interface ResourceForm {
-    fatherResource?: number,
+    fatherResourceId?: number,
     name: string,
     description: string
 }
 
-export function NewResource({resourceType, setOpen}: {resourceType: string, setOpen: any}) {
+export function NewResource({resourcesData, resourceArrayDataRaw, resourceType, setOpen}: {resourcesData: ResourceExtended[], resourceArrayDataRaw: Resource[], resourceType: string, setOpen: any}) {
     const labelTitle = resourceLabel[resourceType];
     const { register, formState: { errors }, handleSubmit } = useForm<ResourceForm>();
 
-    const saveResource = (resource: ResourceForm) => {
+    const saveResource = async (resource: ResourceForm) => {
+
+        if (resourceType === 'company') {
+            await newCompany(resource);
+            setOpen(false);
+        }
+        if (resourceType === 'unit') {
+            await newUnit(resource);
+            setOpen(false);
+        }
+        if (resourceType === 'departament') {
+            await newDepartament(resource);
+            setOpen(false);
+        }
     }
+
+    const newCompany = (data: any) => {
+      const companyData = companyModel.factory(data);
+      return companyModel.create(companyData); 
+    }
+
+    const newUnit = (data: any) => {
+        const fatherResource: ResourceExtended = resourcesData.filter(r => Number(r.id) === Number(data.fatherResourceId))[0];
+        const unitData = unitModel.factory(data);
+        unitModel.create(unitData, fatherResource); 
+    }
+
+    const newDepartament = (data: any) => {
+        const fatherResource: any = resourcesData.flatMap(r => r.children).filter(r => Number(r?.id) === Number(data.fatherResourceId))[0];
+        const departamentData = departamentModel.factory(data);
+        departamentModel.create(departamentData, fatherResource);
+    }
+      
     
     return (
         <div>
@@ -44,20 +72,14 @@ export function NewResource({resourceType, setOpen}: {resourceType: string, setO
                                 Recurso Pai ({resourceType == 'unit'? 'Empresa': 'Unidade'})
                             </label>          
                             <select 
-                                {...register("fatherResource", { required: "Você deve selecionar uma entidade acima", maxLength: 20 })} aria-invalid={errors.fatherResource ? "true" : "false"}
-                                name="fatherResource"
-                                id="fatherResource" 
+                                {...register("fatherResourceId", { required: "Você deve selecionar uma entidade acima", maxLength: 20 })} aria-invalid={errors.fatherResourceId ? "true" : "false"}
+                                name="fatherResourceId"
+                                id="fatherResourceId" 
                                 className=" block w-full rounded-md border-0 py-1.5 px-1.5 mb-4 mt-4 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-navy-200 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+                                defaultValue={''}
                             >
-                                <option value="" disabled selected hidden>Selecione a {resourceType == 'unit'? 'empresa': 'unidade'}</option>
-                                <optgroup label="Grupo 1">
-                                    <option value="1">Opção 1</option>
-                                    <option value="2">Opção 2</option>
-                                </optgroup>
-                                <optgroup label="Grupo 2">
-                                    <option value="3">Opção 3</option>
-                                    <option value="4">Opção 4</option>
-                                </optgroup>
+                                <option disabled value={''} hidden key={'-1'}>Selecione a {resourceType == 'unit'? 'empresa': 'unidade'}</option>
+                                <NestedSelectOption resourcesTree={resourcesData} selectType={resourceType == 'unit'? 'company': 'unit'}/>
                             </select>
                         </div>
                     }
@@ -87,17 +109,17 @@ export function NewResource({resourceType, setOpen}: {resourceType: string, setO
                     />
                 </form>
                 <div className="flex flex-cols gap-5 mt-3">
-                        <button 
-                            onClick={() => setOpen(false)}
-                            className="flex w-full justify-center rounded-md bg-transparent border border-2 border-inding-600 px-3 py-1.5 mt-10 font-semibold text-sm font-normal text-indigo-600 dark:text-white dark:hover:text-white leading-6 shadow-sm hover:ring-inding-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">
-                            Cancelar
-                        </button>
-                        <button 
-                            onClick={handleSubmit(saveResource)}
-                            className="flex w-full justify-center rounded-md bg-indigo-600 px-3 py-1.5 mt-10 font-semibold text-sm font-normal text-white dark:text-white dark:hover:text-white leading-6 shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">
-                            Salvar
-                        </button>
-                    </div>
+                    <button 
+                        onClick={() => setOpen(false)}
+                        className="flex w-full justify-center rounded-md bg-transparent border border-2 border-inding-600 px-3 py-1.5 mt-10 font-semibold text-sm font-normal text-indigo-600 dark:text-white dark:hover:text-white leading-6 shadow-sm hover:ring-inding-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">
+                        Cancelar
+                    </button>
+                    <button 
+                        onClick={handleSubmit(saveResource)}
+                        className="flex w-full justify-center rounded-md bg-indigo-600 px-3 py-1.5 mt-10 font-semibold text-sm font-normal text-white dark:text-white dark:hover:text-white leading-6 shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">
+                        Salvar
+                    </button>
+                </div>
             </div>
         </div>
     );

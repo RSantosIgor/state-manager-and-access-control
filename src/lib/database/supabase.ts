@@ -3,7 +3,7 @@ import supabase from '@/lib/supabase/supabase-browser';
 
 const create = (table: string, data: any, database: SupabaseClient = supabase) => {
     try {
-       return database.from(table).insert({...data, created_at: new Date().getTime()});
+       return database.from(table).insert({...data, created_at: new Date().getTime()}).select('*');
     } catch (error) {
         return Promise.reject(error);
     }
@@ -11,15 +11,23 @@ const create = (table: string, data: any, database: SupabaseClient = supabase) =
 
 const getBy = (table: string, id: number | string, columns: string = '*', database: SupabaseClient = supabase) => {
     try {
-       return database.from(table).select(columns).match({id});
+       return database.from(table).select(columns).match({id}).order('created_at');;
     } catch (error) {
         return Promise.reject(error);
     }
 }
 
+const getByIdIn = (table: string, id: string [] | number[], columns: string = '*', database: SupabaseClient = supabase) => {
+  try {
+     return database.from(table).select(columns).in('id', id).order('created_at');;
+  } catch (error) {
+      return Promise.reject(error);
+  }
+}
+
 const get = (table: string, columns: string = '*', database: SupabaseClient = supabase) => {
   try {
-     return database.from(table).select(columns);
+     return database.from(table).select(columns).order('created_at');
   } catch (error) {
       return Promise.reject(error);
   }
@@ -27,7 +35,7 @@ const get = (table: string, columns: string = '*', database: SupabaseClient = su
 
 const getMatchAny = (table: string, dataMatch: any, columns: string = '*', database: SupabaseClient = supabase) => {
   try {
-     return database.from(table).select(columns).match(dataMatch);
+     return database.from(table).select(columns).match(dataMatch).order('created_at');;
   } catch (error) {
       return Promise.reject(error);
   }
@@ -35,7 +43,7 @@ const getMatchAny = (table: string, dataMatch: any, columns: string = '*', datab
 
 const update = (table: string, id: number | string, data: any, database: SupabaseClient = supabase) => {
   try {
-    database.from(table).update({...data, updated_at: new Date().getTime()}).match({id});
+    return database.from(table).update({...data, updated_at: new Date().getTime()}).eq('id', id).select('*');
   } catch (error) {
       return Promise.reject(error);
   }
@@ -50,6 +58,6 @@ const remove = (table: string, id: number | string, database: SupabaseClient = s
   }
 }
 
-const functions = { create, get, getBy, getMatchAny, update, remove }
+const functions = { create, get, getBy, getByIdIn, getMatchAny, update, remove }
 
 export default functions;

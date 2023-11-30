@@ -1,21 +1,25 @@
-import { Hierarchy, Resource } from "@/types/resource";
+import { Hierarchy, Resource, ResourceExtended } from "@/types/resource";
 import db from "@/lib/database/supabase";
 import permission from '@/models/permission';
 import { user } from '@/models/auth';
+import { Company } from "@/types/company";
+import { Unit } from "@/types/unit";
+import { Departament } from "@/types/departament";
 
 const TABLE = 'resources';
 
-export const create = (data: Resource, supabaseClient: any = undefined) => {
+export const create = async (data: Resource, supabaseClient: any = undefined) => {
     try {
+        const userData = (await user(supabaseClient)).data.session?.user;
+
         return db.create(TABLE, data, supabaseClient)
         .then(async (response: any) => {
             const data = response.data[0];
             if (data.level === 0) {
-                const userData = (await user(supabaseClient)).data.session?.user;
                 await permission.create(permission.factory({ 
-                    resourceId: data.id,
+                    resource_id: data.id,
                     role: 'manager',
-                    userId: userData?.id
+                    user_id: userData?.id
                 }), supabaseClient);
             }
             return response;
@@ -66,30 +70,98 @@ export const remove = (id: number, supabaseClient: any = undefined) => {
 }
 
 export const factory = (data: any, fatherResource?: Resource) => {
+
     const resource: Resource = {
+        id: data.id,
         created_at: data.created_at || new Date().getTime(),
         resource_table_id: data.resource_table_id,
         ref_table: data.ref_table,
-        level: getLevel(fatherResource),
-	    hierarchy: getHierarchy(fatherResource)
+        level: getLevel(data.level, fatherResource),
+	    hierarchy: getHierarchy(data.hierarchy || [], fatherResource)
     }
+
     return resource;
 }
 
-const getHierarchy = (resource?: Resource): Hierarchy[] => {
-    if (resource) {
+export const getResourcesTree = async (resourceDataArray: any[], tableInfoObjects: Company[] | Unit[] | Departament[] = []) => {
+    try {
+
+        const resourcesData: ResourceExtended[] = resourceDataArray.map((responseData: any) => factory(responseData));
+        const hashTableObjects = getHashTable(tableInfoObjects, 'resource_id');
+        const hashTableResource: Record<number, ResourceExtended> = getHashTable(resourcesData);
+        setTableInfo(hashTableResource, hashTableObjects);
+        for (const key in hashTableResource) {
+            if (hashTableResource.hasOwnProperty(key)) {
+                hashTableResource[key].tableInfo = hashTableObjects[key] || null;
+                getChildren(hashTableResource[key], hashTableResource);
+            }
+        }
+
+        return [...Object.values(hashTableResource)];
+
+    } catch (error) {
+        return Promise.reject(error);
+    }
+};
+
+const setTableInfo = (hashTableResource: Record<number,ResourceExtended>, hashTableObjects: Company[] | Unit[] | Departament[] = []) => {
+    
+    for (const key in hashTableResource) {
+        if (hashTableResource.hasOwnProperty(key)) {
+            hashTableResource[key].tableInfo = hashTableObjects[key] || null;
+        }
+    }
+}
+
+const getChildren = (fatherResource: ResourceExtended, hashTableResource: Record<number, ResourceExtended>) => {
+    fatherResource.children = [];
+    for (const key in hashTableResource) {
+        if (hashTableResource.hasOwnProperty(key)) {
+            const r = hashTableResource[key];
+            const matchHierarchy = getMatchHierarchy(Number(fatherResource.id), r.hierarchy);
+            if ((r.level - 1) === fatherResource.level && matchHierarchy) {
+                fatherResource.children?.push(r);
+                delete hashTableResource[Number(r?.id)];
+            }
+        }
+    }
+    
+    fatherResource.children?.forEach((children: ResourceExtended) => {
+        getChildren(children, hashTableResource);
+    });
+};
+
+const getMatchHierarchy = (fatherId: number, hierarchy: Hierarchy[]) => {
+    const hasHierarchy: boolean = Boolean(hierarchy.find(h => h.resource_id === fatherId));
+    return hasHierarchy;
+};
+
+const getHashTable = (dataArray: any[], hashKey: string = 'id') => {
+    const hashTable: any = {};
+    for (const data of dataArray) {
+        hashTable[data[hashKey]] = data
+    }
+
+    return hashTable;
+};
+
+
+const getHierarchy = (hierarchy: Hierarchy[], fatherResource?: Resource): Hierarchy[] => {
+    if (hierarchy && hierarchy.length > 0) {
+        return hierarchy;
+    } else if (fatherResource) {
         return [
-            ...resource.hierarchy,
-            {resource_id: Number(resource.id), level: resource.level, label: resource.ref_table}
+            ...fatherResource.hierarchy,
+            {resource_id: Number(fatherResource.id), level: fatherResource.level, ref_table: fatherResource.ref_table}
         ];
     }
     return [];
 }
 
-const getLevel = (resource?: Resource): number => {
-    return resource ? resource.level + 1: 0;
+const getLevel = (level: number, fatherResource?: Resource): number => {
+    return level || level === 0 ? level: (fatherResource ? fatherResource.level + 1: 0);
 }
 
-const functions = { create, getById, getByResourceTableId, update, remove, factory };
+const functions = { create, getAll, getById, getByResourceTableId, update, remove, factory };
 
 export default functions;

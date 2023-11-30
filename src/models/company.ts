@@ -8,10 +8,9 @@ const TABLE = 'companies';
 export const create = (data: Company, supabaseClient: any = undefined) => {
     try {
         const resourceData = resource.factory({ 
-            resource_table_id: data.id,
+            resource_table_id: null,
             ref_table: TABLE
         });
-
         return resource.create(resourceData, supabaseClient)
         .then(async (response: any) => {
             const resourceDoc = response.data[0];
@@ -20,7 +19,8 @@ export const create = (data: Company, supabaseClient: any = undefined) => {
         })
         .then(async (response: any) => {
             const companyDoc = response.data[0];
-            await resource.update(companyDoc.resource_id, {resource_table_id: companyDoc.id}, supabaseClient);
+            const {data, error} = await resource.update(companyDoc.resource_id, {resource_table_id: companyDoc.id}, supabaseClient);
+            console.log(error);
             return response; 
         });
     } catch (error) {
@@ -43,6 +43,15 @@ export const getById = (id: number, supabaseClient: any = undefined) => {
         return Promise.reject(error);
     }
 }
+
+export const getByIds = (ids: number[], supabaseClient: any = undefined) => {
+    try {
+        return db.getByIdIn(TABLE, ids, supabaseClient);
+    } catch (error) {
+        return Promise.reject(error);
+    }
+}
+
 
 export const getByResourceId = (resourceId: number, supabaseClient = undefined) => {
     try {

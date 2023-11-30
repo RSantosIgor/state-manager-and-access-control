@@ -10,9 +10,11 @@ function ButtonDropdown({handleButton}: {handleButton: React.Dispatch<React.SetS
       button={
         <button
           onClick={() => setOpen(!open)}
-          className={`flex items-center rounded-md bg-indigo-600 px-3 py-1.5 mt-10 font-semibold text-sm font-normal text-white dark:text-white dark:hover:text-white leading-6 shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 transition duration-200`}
+          className={`flex items-center rounded-md divide-x bg-indigo-600 px-3 py-1.5 mt-10 font-semibold text-sm font-normal text-white dark:text-white dark:hover:text-white leading-6 shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 transition duration-200`}
         >
-            Novo Recurso
+            <p className="px-2">
+              Novo Recurso
+            </p>
             <RiArrowDownSLine className="h-6 w-6 text-white font-semibold text-sm"/>
         </button>
       }

@@ -1,4 +1,7 @@
+import { Departament } from '@/types/departament';
 import { BasicModel } from "./basic-model"
+import { Unit } from './unit';
+import { Company } from './company';
 
 export type Resource = BasicModel & {
 	resource_table_id?: number, //id from Company, Unit or departament
@@ -7,10 +10,15 @@ export type Resource = BasicModel & {
 	hierarchy: Hierarchy []
 }
 
-type Hierarchy = {
+export type Hierarchy = {
     resource_id: number,
-    label: string, 
+    ref_table: 'companies' | 'units' | 'departaments', 
     level: number
+}
+
+export type ResourceExtended = Resource & {
+	children?: ResourceExtended [],
+	tableInfo?: Company | Unit | Departament
 }
 
 export enum RefTable {

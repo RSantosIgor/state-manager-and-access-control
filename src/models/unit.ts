@@ -8,7 +8,7 @@ const TABLE = 'units';
 export const create = (data: Unit, fatherResource: Resource, supabaseClient: any = undefined) => {
     try {
         const resourceData = resource.factory({ 
-            resource_table_id: data.id,
+            resource_table_id: null,
             ref_table: TABLE
         }, fatherResource);
 
@@ -43,6 +43,15 @@ export const getById = (id: number, supabaseClient: any = undefined) => {
         return Promise.reject(error);
     }
 }
+
+export const getByIds = (ids: number[], supabaseClient: any = undefined) => {
+    try {
+        return db.getByIdIn(TABLE, ids, supabaseClient);
+    } catch (error) {
+        return Promise.reject(error);
+    }
+}
+
 
 export const getByResourceId = (resourceId: number, supabaseClient: any = undefined) => {
     try {

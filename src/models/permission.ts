@@ -6,7 +6,13 @@ const TABLE = 'permissions';
 export const create = (data: Permission, supabaseClient: any = undefined) => {
     try {
         //Todo: Future - Check if user exists
-        return db.create(TABLE, data, supabaseClient);
+        return db.create(TABLE, data, supabaseClient)
+        .then(response => {
+            if(response.error) {
+                console.log(response.error);
+            }
+            return response;
+        });
     } catch (error) {
         return Promise.reject(error);
     }
@@ -27,6 +33,15 @@ export const getById = (id: number, supabaseClient: any = undefined) => {
         return Promise.reject(error);
     }
 }
+
+export const getByIds = (ids: number[], supabaseClient: any = undefined) => {
+    try {
+        return db.getByIdIn(TABLE, ids, supabaseClient);
+    } catch (error) {
+        return Promise.reject(error);
+    }
+}
+
 
 export const getByUser = (userId: string, supabaseClient: any = undefined) => {
     try {

@@ -43,7 +43,7 @@ const Layout = ({ children } : { children: React.ReactNode}) => {
       <div className="h-full font-dm dark:bg-navy-900">
         {/* Main Content */}
         <main
-          className={`mx-2.5  flex-none transition-all dark:bg-navy-900 
+          className={`mx-2.5 w-100p flex-none transition-all dark:bg-navy-900 
               md:pr-2 xl:ml-[323px]`}
         >
           {/* Routes */}

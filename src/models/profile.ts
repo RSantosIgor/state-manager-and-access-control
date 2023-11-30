@@ -19,6 +19,15 @@ export const getById = (id: string, supabaseClient: any = undefined) => {
     }
 }
 
+export const getByIds = (ids: string[], supabaseClient: any = undefined) => {
+    try {
+        return db.getByIdIn(TABLE, ids, supabaseClient);
+    } catch (error) {
+        return Promise.reject(error);
+    }
+}
+
+
 export const update = (id: string, data: any, supabaseClient: any = undefined) => {
     try {
         return db.update(TABLE, id, data, supabaseClient);
