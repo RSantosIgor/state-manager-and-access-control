@@ -25,6 +25,14 @@ const getByIdIn = (table: string, id: string [] | number[], columns: string = '*
   }
 }
 
+const getByAnyIn = (table: string, key: string, values: any[], columns: string = '*', database: SupabaseClient = supabase) => {
+  try {
+     return database.from(table).select(columns).in(key, values).order('created_at');;
+  } catch (error) {
+      return Promise.reject(error);
+  }
+}
+
 const get = (table: string, columns: string = '*', database: SupabaseClient = supabase) => {
   try {
      return database.from(table).select(columns).order('created_at');
@@ -58,6 +66,6 @@ const remove = (table: string, id: number | string, database: SupabaseClient = s
   }
 }
 
-const functions = { create, get, getBy, getByIdIn, getMatchAny, update, remove }
+const functions = { create, get, getBy, getByIdIn, getByAnyIn, getMatchAny, update, remove }
 
 export default functions;

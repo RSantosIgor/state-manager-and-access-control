@@ -18,7 +18,7 @@ interface ResourceForm {
     description: string
 }
 
-export function NewResource({resourcesData, resourceArrayDataRaw, resourceType, setOpen}: {resourcesData: ResourceExtended[], resourceArrayDataRaw: Resource[], resourceType: string, setOpen: any}) {
+export function CreateEditResource({resourcesData, currentResource = null, resourceType, setOpen}: {resourcesData: ResourceExtended[], currentResource: ResourceExtended | null, resourceType: string, setOpen: any}) {
     const labelTitle = resourceLabel[resourceType];
     const { register, formState: { errors }, handleSubmit } = useForm<ResourceForm>();
 
@@ -39,20 +39,32 @@ export function NewResource({resourcesData, resourceArrayDataRaw, resourceType, 
     }
 
     const newCompany = (data: any) => {
-      const companyData = companyModel.factory(data);
-      return companyModel.create(companyData); 
+        if(!currentResource) {
+            const companyData = companyModel.factory(data);
+            return companyModel.create(companyData); 
+        } else {
+            return companyModel.update(Number(currentResource.resource_table_id), {name: data.name, description: data.description})
+        }
     }
 
     const newUnit = (data: any) => {
-        const fatherResource: ResourceExtended = resourcesData.filter(r => Number(r.id) === Number(data.fatherResourceId))[0];
-        const unitData = unitModel.factory(data);
-        unitModel.create(unitData, fatherResource); 
+        if(!currentResource) {
+            const fatherResource: ResourceExtended = resourcesData.filter(r => Number(r.id) === Number(data.fatherResourceId))[0];
+            const unitData = unitModel.factory(data);
+            return unitModel.create(unitData, fatherResource); 
+        } else {
+           return unitModel.update(Number(currentResource.resource_table_id), {name: data.name, description: data.description});
+        }
     }
 
     const newDepartament = (data: any) => {
-        const fatherResource: any = resourcesData.flatMap(r => r.children).filter(r => Number(r?.id) === Number(data.fatherResourceId))[0];
-        const departamentData = departamentModel.factory(data);
-        departamentModel.create(departamentData, fatherResource);
+        if (!currentResource) {
+            const fatherResource: any = resourcesData.flatMap(r => r.children).filter(r => Number(r?.id) === Number(data.fatherResourceId))[0];
+            const departamentData = departamentModel.factory(data);
+            return departamentModel.create(departamentData, fatherResource);
+        } else {
+            return departamentModel.update(Number(currentResource.resource_table_id), {name: data.name, description: data.description});
+        }
     }
       
     
@@ -60,7 +72,7 @@ export function NewResource({resourcesData, resourceArrayDataRaw, resourceType, 
         <div>
             <div className="sm:mx-auto sm:w-full sm:max-w-sm">
                 <h2 className="text-center leading-9 font-poppins text-[20px] font-bold uppercase text-navy-700 dark:text-white">
-                    Novo Recurso ({labelTitle})
+                    {currentResource ? 'Editar': 'Novo'} Recurso ({labelTitle})
                 </h2>
             </div>
 

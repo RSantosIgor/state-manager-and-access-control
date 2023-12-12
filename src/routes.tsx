@@ -1,4 +1,4 @@
-import { FaHouse, FaSitemap, FaAddressBook } from 'react-icons/fa6';
+import { FaHouse, FaSitemap, FaIdCardClip, FaElevator } from 'react-icons/fa6';
 import React from 'react';
 
 
@@ -14,6 +14,12 @@ const routes = [
     layout: '/dashboard',
     path: 'resources',
     icon: <FaSitemap  className="h-6 w-6" />
+  },
+  {
+    name: 'Atribuir Permissões',
+    layout: '/dashboard',
+    path: 'permissions',
+    icon: <FaIdCardClip  className="h-6 w-6" />
   }
 ];
 

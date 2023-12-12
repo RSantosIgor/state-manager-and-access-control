@@ -1,10 +1,12 @@
 import { Hierarchy, Resource, ResourceExtended } from "@/types/resource";
 import db from "@/lib/database/supabase";
-import permission from '@/models/permission';
+import permission, { setPermissionsInResource } from '@/models/permission';
 import { user } from '@/models/auth';
 import { Company } from "@/types/company";
 import { Unit } from "@/types/unit";
 import { Departament } from "@/types/departament";
+import { Permission, PermissionExtended } from "@/types/permission";
+import { Profile } from "@/types/profile";
 
 const TABLE = 'resources';
 
@@ -86,13 +88,15 @@ export const factory = (data: any, fatherResource?: Resource) => {
 export const getResourcesTree = async (resourceDataArray: any[], tableInfoObjects: Company[] | Unit[] | Departament[] = []) => {
     try {
 
-        const resourcesData: ResourceExtended[] = resourceDataArray.map((responseData: any) => factory(responseData));
+        const resources: ResourceExtended[] = resourceDataArray.map((responseData: any) => factory(responseData));
+        const resourcesData: ResourceExtended[] =  await setPermissionsInResource(resources);
         const hashTableObjects = getHashTable(tableInfoObjects, 'resource_id');
         const hashTableResource: Record<number, ResourceExtended> = getHashTable(resourcesData);
         setTableInfo(hashTableResource, hashTableObjects);
+
         for (const key in hashTableResource) {
             if (hashTableResource.hasOwnProperty(key)) {
-                hashTableResource[key].tableInfo = hashTableObjects[key] || null;
+                //hashTableResource[key].tableInfo = hashTableObjects[key] || null;
                 getChildren(hashTableResource[key], hashTableResource);
             }
         }
@@ -162,6 +166,21 @@ const getLevel = (level: number, fatherResource?: Resource): number => {
     return level || level === 0 ? level: (fatherResource ? fatherResource.level + 1: 0);
 }
 
-const functions = { create, getAll, getById, getByResourceTableId, update, remove, factory };
+export const getResourceFromTree = (resourceId: number, resourcesTree: ResourceExtended[]) => {
+
+    for (const resource of resourcesTree) {
+        if (resource.id == resourceId) {
+            return resource;
+        } 
+
+        const foundNode: any = getResourceFromTree(resourceId, (resource.children || []));
+        if (foundNode) {
+            return foundNode;
+        }
+    }
+    return null;
+}
+
+const functions = { create, getAll, getById, getByResourceTableId, getResourceFromTree, update, remove, factory };
 
 export default functions;

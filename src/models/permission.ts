@@ -1,5 +1,7 @@
 import db from "@/lib/database/supabase";
-import { Permission } from "@/types/permission";
+import { Permission, PermissionExtended } from "@/types/permission";
+import { Resource, ResourceExtended } from "@/types/resource";
+import { setProfileInPermission } from "./profile";
 
 const TABLE = 'permissions';
 
@@ -59,6 +61,13 @@ export const getByResource = (resourceId: number, supabaseClient: any = undefine
     }
 }
 
+export const getByResources = (resourceIds: number[], supabaseClient: any = undefined) => {
+    try {
+        return db.getByAnyIn(TABLE, 'resource_id', resourceIds, supabaseClient);
+    } catch (error) {
+        return Promise.reject(error);
+    }
+}
 export const update = (id: number, data: any, supabaseClient: any = undefined) => {
     try {
         return db.update(TABLE, id, data, supabaseClient);
@@ -77,6 +86,7 @@ export const remove = (id: number, supabaseClient: any = undefined) => {
 
 export const factory = (data: any) => {
     const permission: Permission = {
+        id: data.id,
         created_at: data.created_at || new Date().getTime(),
         user_id: data.user_id,
         resource_id: data.resource_id,
@@ -85,7 +95,16 @@ export const factory = (data: any) => {
     return permission;
 }
 
-
+export const setPermissionsInResource = async (resources: Resource[], supabaseClient: any = undefined) => {
+    const resourcesIds = resources.map(resource => Number(resource.id));
+    const { data } = await getByResources(resourcesIds, supabaseClient);
+    const permissions: Permission[] = data ? data?.map(d => factory(d)): [];
+    const permissionsAndProfile: PermissionExtended[] = await setProfileInPermission(permissions, supabaseClient);
+    return resources.map((resource: Resource) => {
+        const permissionResource = permissionsAndProfile.filter(pP => pP.resource_id == resource.id);
+        return {...resource, permissions: permissionResource}
+    });
+}
 const functions = { create, getById, getByResource, getByUser, update, remove, factory };
 
 export default functions;
