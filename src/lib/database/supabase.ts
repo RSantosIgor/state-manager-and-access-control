@@ -51,7 +51,7 @@ const getMatchAny = (table: string, dataMatch: any, columns: string = '*', datab
 
 const update = (table: string, id: number | string, data: any, database: SupabaseClient = supabase) => {
   try {
-    return database.from(table).update({...data, updated_at: new Date().getTime()}).eq('id', id).select('*');
+    return database.from(table).update({...data, updated_at: new Date().getTime()}).eq('id', id);
   } catch (error) {
       return Promise.reject(error);
   }

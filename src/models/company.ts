@@ -14,13 +14,16 @@ export const create = (data: Company, supabaseClient: any = undefined) => {
         return resource.create(resourceData, supabaseClient)
         .then(async (response: any) => {
             const resourceDoc = response.data[0];
+            console.log('resourceDoc', resourceDoc);
             const resource_id: number = resourceDoc.id;
             return db.create(TABLE, {...data, resource_id}, supabaseClient);
         })
         .then(async (response: any) => {
             const companyDoc = response.data[0];
+            console.log(companyDoc);
             const {data, error} = await resource.update(companyDoc.resource_id, {resource_table_id: companyDoc.id}, supabaseClient);
-            console.log(error);
+            console.log('Resource Update', data);
+            console.log('Resource Update', error);
             return response; 
         });
     } catch (error) {

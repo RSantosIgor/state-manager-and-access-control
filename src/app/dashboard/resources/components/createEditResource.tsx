@@ -37,15 +37,24 @@ export function CreateEditResource({resourcesData, currentResource = null, resou
     const saveResource = async (resource: ResourceForm) => {
 
         if (resourceType === 'company') {
-            await newCompany(resource);
+            const {error} = await newCompany(resource);
+            if(error) {
+                console.log('Create new Resource error: ', error);
+            }
             setOpen(false);
         }
         if (resourceType === 'unit') {
-            await newUnit(resource);
+            const {error} = await newUnit(resource);
+            if(error) {
+                console.log('Create new Resource error: ', error);
+            }
             setOpen(false);
         }
         if (resourceType === 'departament') {
-            await newDepartament(resource);
+            const {error} = await newDepartament(resource);
+            if(error) {
+                console.log('Create new Resource error: ', error);
+            }
             setOpen(false);
         }
     }
@@ -53,6 +62,7 @@ export function CreateEditResource({resourcesData, currentResource = null, resou
     const newCompany = (data: any) => {
         if(!currentResource) {
             const companyData = companyModel.factory(data);
+            console.log('New Company: ', companyData);
             return companyModel.create(companyData); 
         } else {
             return companyModel.update(Number(currentResource.resource_table_id), {name: data.name, description: data.description})

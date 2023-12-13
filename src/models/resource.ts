@@ -13,10 +13,15 @@ const TABLE = 'resources';
 export const create = async (data: Resource, supabaseClient: any = undefined) => {
     try {
         const userData = (await user(supabaseClient)).data.session?.user;
-
+        console.log(data)
         return db.create(TABLE, data, supabaseClient)
         .then(async (response: any) => {
+
+            if (response.error) {
+                console.log('Create resource error: ', response.error)
+            }
             const data = response.data[0];
+
             if (data.level === 0) {
                 await permission.create(permission.factory({ 
                     resource_id: data.id,

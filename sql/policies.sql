@@ -7,7 +7,7 @@ to authenticated
 using ( true );
 
 create policy "Create profile"
-on profiles for create
+on profiles for insert
 using ( true );
 
 create policy "Update profile"
@@ -26,19 +26,30 @@ alter table resources enable row level security;
 create policy "Select resource"
 on resources for select
 to public
-using (check_permissions(auth.uid(), id, array['manager', 'writer', 'reader']));
+using (check_permissions(auth.uid(), id, array['manager', 'writer', 'reader']) OR (NOT (resource_table_id IS DISTINCT FROM NULL)));
+
 
 create policy "Create resource"
-on resources for create
+on resources for insert
 to public
-using ((level === 0) OR (check_permissions(auth.uid(), id, array['manager', 'writer'])) );
+WITH CHECK (
+    level = 0 OR
+    (
+        EXISTS (
+            SELECT 1
+            FROM jsonb_array_elements(hierarchy) AS h(obj)
+            WHERE  check_permissions(auth.uid(), (obj->>'resource_id') ::bigint , array['manager'])
+            
+        )
+    )
+);
 
 create policy "Update resource"
 on resources for update
 to public
-using ( check_permissions(auth.uid(), id, array['manager', 'writer']) );
+WITH CHECK (check_permissions(auth.uid(), id, array['manager']));
 
 create policy "Delete resource"
 on resources for delete
 to public
-using ( check_permissions(auth.uid(), id, array['manager', 'writer']) );
+using ( check_permissions(auth.uid(), id, array['manager']) );
