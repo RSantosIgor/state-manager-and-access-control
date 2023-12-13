@@ -21,9 +21,9 @@ export function ResourceList({ resourcesData }: { resourcesData: ResourceExtende
                             </Link>
                         </div>
                     </header>
-                    <div className="w-100p flex">
-                        <p className="text-sm font-semibold text-gray-600 font-semibold p-3">
-                            {company.tableInfo?.description.slice(0, 100) + '...' || 'LOREM'}
+                    <div className="w-100p">
+                        <p className="w-60p break-words max-w-50 text-sm font-semibold text-gray-600 font-semibold p-3">
+                            {company.tableInfo?.description.slice(0, 80) + '...' || 'LOREM'}
                         </p>
                     </div>
                     <div className="mt-3 border-t border-gray-600 p-0.5 flex items-center justify-between">
@@ -67,9 +67,9 @@ export function ResourceList({ resourcesData }: { resourcesData: ResourceExtende
                                 </Link>
                             </div>
                         </header>
-                        <div>
-                            <p className="text-sm font-semibold text-gray-600 font-semibold p-3">
-                                {unit.tableInfo?.description || 'LOREM'}
+                        <div className="w-100p">
+                            <p className="w-60p break-words text-sm font-semibold text-gray-600 font-semibold p-3">
+                                {unit.tableInfo?.description.slice(0, 80) || 'LOREM'}
                             </p>
                         </div>
                         <div className="mt-3 border-t border-gray-600 p-0.5 flex items-center justify-between">
@@ -109,9 +109,9 @@ export function ResourceList({ resourcesData }: { resourcesData: ResourceExtende
                                 </Link>
                             </div>
                         </header>
-                        <div>
-                            <p className="text-sm font-semibold text-gray-600 font-semibold p-3">
-                                {departament.tableInfo?.description || 'LOREM'}
+                        <div className="w-100p">
+                            <p className="w-60p break-words text-sm font-semibold text-gray-600 font-semibold p-3">
+                                {departament.tableInfo?.description.slice(0, 80) || 'LOREM'}
                             </p>
                         </div>
                         <div className="mt-3 border-t border-gray-600 p-0.5 flex items-center justify-end">

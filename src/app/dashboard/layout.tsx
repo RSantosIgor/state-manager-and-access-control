@@ -11,12 +11,17 @@ import resource, { getResourcesTree } from "@/models/resource";
 import company from "@/models/company";
 import unit from "@/models/unit";
 import departament from "@/models/departament";
+import permission from "@/models/permission";
 import { ResourceExtended } from '@/types/resource';
 import { ResourceContext } from '@/context/resourcesTree';
+import supabaseBrowser from '@/lib/supabase/supabase-browser';
+import { PermissionExtended } from '@/types/permission';
+import { PermissionContext } from '@/context/permission';
 
 const Layout = ({ children } : { children: React.ReactNode}) => {
   
   const [resourcesData, setResourcesData] = useState<ResourceExtended[]>([])
+  const [myPermissions, setMyPermissions] = useState<PermissionExtended[]>([]);
   const [open, setOpen] = useState(false);
   const pathname = usePathname();
   const router = useRouter();
@@ -28,12 +33,24 @@ const Layout = ({ children } : { children: React.ReactNode}) => {
       middlewareAuth(pathname, isLoggedIn);
       if(isLoggedIn) {
         getResource();
+        getMyPermissions(res.data.session?.user.id || '');
       }
     });
   }, []);
 
+  const getMyPermissions = async (user_id: string) => {
+    const {data, error} = await permission.getByUser(user_id, supabaseBrowser);
+    const permissionsData = data?.map((p: any) => permission.factory(p)) || [];
+    console.log('My permissions: ', permissionsData);
+    setMyPermissions(permissionsData);
+
+  }
+
   const getResource = async () => {
     const {data, error} = await resource.getAll();
+    if(error) {
+      console.log(error);
+    }
     const companies = await getCompanies();
     const units = await getUnits();
     const departaments = await getDepartaments();
@@ -87,12 +104,12 @@ const Layout = ({ children } : { children: React.ReactNode}) => {
 
 
   return (
-    <div className="flex justify-center h-full w-full bg-background-100 dark:bg-background-900">
-      <div className="min-w-[25vw]">
+    <div className="flex justify-between h-full w-100vw bg-background-100 dark:bg-background-900">
+      <div className="min-w-[20vw]">
         <Sidebar routes={routes} open={open} setOpen={setOpen} variant="admin"/>
       </div>
       {/* Navbar & Main Content */}
-      <div className="h-full font-dm dark:bg-navy-900">
+      <div className="h-full min-w-[75vw] font-dm dark:bg-navy-900">
         {/* Main Content */}
         <main
           className={`mx-2.5 flex-none transition-all dark:bg-navy-900 
@@ -106,12 +123,14 @@ const Layout = ({ children } : { children: React.ReactNode}) => {
               secondary={getActiveNavbar(routes, pathname)}
             />
             <ResourceContext.Provider value={{resourcesResourceExtended: resourcesData, setResourceExtended: setResourcesData}}>
-              <div className="mx-auto min-h-screen min-w-[74vw] p-2 !pt-[10px] md:p-2">
-                {children}
-              </div>
-  {/*         <div className="p-3">
-                <Footer />
-              </div> */}
+              <PermissionContext.Provider value={{myPermissions, setMyPermissions}}>
+                <div className="mx-auto ml-10 min-h-screen p-2 pl-[15px] !pt-[10px] md:p-2">
+                  {children}
+                </div>
+    {/*         <div className="p-3">
+                  <Footer />
+                </div> */}
+              </PermissionContext.Provider>
             </ResourceContext.Provider>
           </div>
         </main>

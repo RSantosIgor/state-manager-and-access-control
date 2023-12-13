@@ -1,3 +1,4 @@
+import { Hierarchy } from './../types/resource.d';
 import db from "@/lib/database/supabase";
 import { Permission, PermissionExtended } from "@/types/permission";
 import { Resource, ResourceExtended } from "@/types/resource";
@@ -45,9 +46,9 @@ export const getByIds = (ids: number[], supabaseClient: any = undefined) => {
 }
 
 
-export const getByUser = (userId: string, supabaseClient: any = undefined) => {
+export const getByUser = (user_id: string, supabaseClient: any = undefined) => {
     try {
-        return db.getMatchAny(TABLE, {userId}, supabaseClient);
+        return db.getMatchAny(TABLE, {user_id}, '*', supabaseClient);
     } catch (error) {
         return Promise.reject(error);
     }
@@ -55,7 +56,7 @@ export const getByUser = (userId: string, supabaseClient: any = undefined) => {
 
 export const getByResource = (resourceId: number, supabaseClient: any = undefined) => {
     try {
-        return db.getMatchAny(TABLE, {resourceId}, supabaseClient);
+        return db.get(TABLE, '*', supabaseClient);
     } catch (error) {
         return Promise.reject(error);
     }
@@ -105,6 +106,21 @@ export const setPermissionsInResource = async (resources: Resource[], supabaseCl
         return {...resource, permissions: permissionResource}
     });
 }
-const functions = { create, getById, getByResource, getByUser, update, remove, factory };
+
+export const hasPermissionInResource = (permissions: PermissionExtended[], resource: ResourceExtended, roleRequired: string[]) => {
+    const hierarchy: Hierarchy[] = resource.hierarchy;
+    console.log(hierarchy);
+    for (const permission of permissions) {
+        const hasPermissionInSuper = hierarchy.map(h => h.resource_id == permission.resource_id).reduce((p, n) => Boolean(p || n), false);
+        console.log(hasPermissionInSuper);
+        if (permission.resource_id == resource.id || hasPermissionInSuper) {
+            const role = permission.role;
+            return !!roleRequired.find(r => r == role);
+        }
+    }
+    return false;
+}
+
+const functions = { create, getById, getByResource, getByUser, update, remove, factory, hasPermissionInResource };
 
 export default functions;

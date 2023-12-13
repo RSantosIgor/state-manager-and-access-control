@@ -5,6 +5,7 @@ import departamentModel from "@/models/departament";
 import { Resource, ResourceExtended } from "@/types/resource";
 import { NestedSelectOption } from "./nestedSelectOptions";
 import resourceModel from "@/models/resource";
+import { useEffect } from "react";
 
 const resourceLabel: any = {
     company: 'Empresa',
@@ -20,7 +21,18 @@ interface ResourceForm {
 
 export function CreateEditResource({resourcesData, currentResource = null, resourceType, setOpen}: {resourcesData: ResourceExtended[], currentResource: ResourceExtended | null, resourceType: string, setOpen: any}) {
     const labelTitle = resourceLabel[resourceType];
-    const { register, formState: { errors }, handleSubmit } = useForm<ResourceForm>();
+    const { register, setValue, formState: { errors }, handleSubmit } = useForm<ResourceForm>();
+
+    useEffect(() => {
+        if (currentResource && currentResource.tableInfo) {
+            if (currentResource.level > 0) {
+                const father = currentResource.hierarchy.reverse()[0]
+                setValue('fatherResourceId', father.resource_id);
+            }
+            setValue('name', currentResource.tableInfo?.name);
+            setValue('description', currentResource.tableInfo?.description);
+        }
+    }, []);
 
     const saveResource = async (resource: ResourceForm) => {
 

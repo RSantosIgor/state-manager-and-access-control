@@ -11,7 +11,7 @@ const create = (table: string, data: any, database: SupabaseClient = supabase) =
 
 const getBy = (table: string, id: number | string, columns: string = '*', database: SupabaseClient = supabase) => {
     try {
-       return database.from(table).select(columns).match({id}).order('created_at');;
+       return database.from(table).select(columns).match({id}).order('created_at');
     } catch (error) {
         return Promise.reject(error);
     }
@@ -19,7 +19,7 @@ const getBy = (table: string, id: number | string, columns: string = '*', databa
 
 const getByIdIn = (table: string, id: string [] | number[], columns: string = '*', database: SupabaseClient = supabase) => {
   try {
-     return database.from(table).select(columns).in('id', id).order('created_at');;
+     return database.from(table).select(columns).in('id', id).order('created_at');
   } catch (error) {
       return Promise.reject(error);
   }
@@ -27,7 +27,7 @@ const getByIdIn = (table: string, id: string [] | number[], columns: string = '*
 
 const getByAnyIn = (table: string, key: string, values: any[], columns: string = '*', database: SupabaseClient = supabase) => {
   try {
-     return database.from(table).select(columns).in(key, values).order('created_at');;
+     return database.from(table).select(columns).in(key, values).order('created_at');
   } catch (error) {
       return Promise.reject(error);
   }
@@ -43,7 +43,7 @@ const get = (table: string, columns: string = '*', database: SupabaseClient = su
 
 const getMatchAny = (table: string, dataMatch: any, columns: string = '*', database: SupabaseClient = supabase) => {
   try {
-     return database.from(table).select(columns).match(dataMatch).order('created_at');;
+    return database.from(table).select(columns).match({...dataMatch}).order('created_at');
   } catch (error) {
       return Promise.reject(error);
   }

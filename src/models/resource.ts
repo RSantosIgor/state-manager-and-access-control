@@ -33,7 +33,7 @@ export const create = async (data: Resource, supabaseClient: any = undefined) =>
 
 export const getAll = (supabaseClient: any = undefined) => {
     try {
-        return db.get(TABLE, supabaseClient);
+        return db.get(TABLE, '*', supabaseClient);
     } catch (error) {
         return Promise.reject(error);
     }

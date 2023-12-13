@@ -8,23 +8,30 @@ import BasicModal from "../modal";
 import { useContext, useEffect, useState } from "react";
 import { ResourceContext } from "@/context/resourcesTree";
 import Permissions from "../permissions";
-import permissionModel from "@/models/permission";
+import permissionModel, { hasPermissionInResource } from "@/models/permission";
 import userModel from "@/models/profile";
 import supabaseBrowser from "@/lib/supabase/supabase-browser";
+import { CreateEditResource } from "@/app/dashboard/resources/components/createEditResource";
+import { PermissionContext } from "@/context/permission";
+
+const resourceTypes  = ['company', 'unit', 'departament'];
 
 export default function Details ({resource}: {resource: ResourceExtended}) {
-  const [modalOpen, setModalOpen] = useState(false);
+  const [modalPermissionOpen, setModalPermissionOpen] = useState(false);
+  const [modalResourceOpen, setModalResourceOpen] = useState(false);
   const [resourcesData, setResourcesData] = useState<ResourceExtended[]>([]);
   const [p, setP] = useState<PermissionExtended | null>(null);
   const resourcesContext = useContext(ResourceContext);
+  const myPermissionsContext = useContext(PermissionContext);
 
   const modalOpenButton = (permissionArg: PermissionExtended | null) => {
       setP(permissionArg)
-      setModalOpen(!modalOpen);
+      setModalPermissionOpen(!modalPermissionOpen);
   }
 
   const submitCreateOrEdit = async (permission: any) => {
-    setModalOpen(false);
+    setModalPermissionOpen(!modalPermissionOpen);
+    (false);
     if(p) {
       updatePermission(permission);
     } else {
@@ -59,12 +66,19 @@ export default function Details ({resource}: {resource: ResourceExtended}) {
 
 
   return (
-    <div className="w-full">
+    <div className="w-100p">
       <BasicModal
-        open={modalOpen} 
-        setOpen={setModalOpen} 
+        open={modalPermissionOpen} 
+        setOpen={setModalPermissionOpen} 
         // eslint-disable-next-line react/no-children-prop
-        children={<Permissions resources={resourcesData} currentResource={resource} permission={p} submit={submitCreateOrEdit} setOpen={setModalOpen}/>} 
+        children={<Permissions resources={resourcesData} currentResource={resource} permission={p} submit={submitCreateOrEdit} setOpen={setModalPermissionOpen}/>} 
+      />
+
+    <BasicModal
+        open={modalResourceOpen} 
+        setOpen={setModalResourceOpen} 
+        // eslint-disable-next-line react/no-children-prop
+        children={<CreateEditResource resourcesData={resourcesData} currentResource={resource} resourceType={resourceTypes[resource.level]} setOpen={setModalResourceOpen}/>} 
       />
       <div className="flex w-full justify-end">
         <button 
@@ -80,13 +94,14 @@ export default function Details ({resource}: {resource: ResourceExtended}) {
             <div className="text-xl font-bold text-navy-700 dark:text-white">
               {resource.tableInfo?.name}
             </div>
-            <button 
+            {hasPermissionInResource(myPermissionsContext.myPermissions, resource, ['manager']) && <button 
+              onClick={() => setModalResourceOpen(true)}
               className="dark:active-bg-white-20 linear rounded-[20px] bg-lightPrimary px-4 py-2 text-base font-medium text-brand-500 transition duration-200 hover:bg-gray-100 active:bg-gray-200 dark:bg-white/5 dark:text-white dark:hover:bg-white/10">
                 Editar
-            </button>
+            </button>}
           </header>
-          <div className="w-full py-4 text-navy-700 text-small text-justify border-b border-gray-200">
-            {resource.tableInfo?.description}
+          <div className="w-95p py-4 text-navy-700 text-small text-justify border-b border-gray-200 break-words">
+            {resource.tableInfo?.description.slice(0, 80) || ''}
           </div>
         </div>
 
@@ -96,31 +111,31 @@ export default function Details ({resource}: {resource: ResourceExtended}) {
             <div className="text-xl font-bold text-navy-700 dark:text-white">
               Pessoas
             </div>
-            <button 
+            { hasPermissionInResource(myPermissionsContext.myPermissions, resource, ['manager', 'writer']) && <button 
               onClick={()=> modalOpenButton(null)}
               className="dark:active-bg-white-20 linear rounded-[20px] bg-lightPrimary px-4 py-2 text-base font-medium text-brand-500 transition duration-200 hover:bg-gray-100 active:bg-gray-200 dark:bg-white/5 dark:text-white dark:hover:bg-white/10">
                 Adicionar
-            </button>
+            </button>}
           </header>
           <div className="mt-8 overflow-x-scroll xl:overflow-x-hidden">
             <table className="w-full">
               <thead>
                 <tr className="!border-px !border-gray-400 border-b border-gray-200 flex justify-between">
                   <th className="cursor-pointer pb-2 pr-4 pt-4 text-start dark:border-white/30">
-                    <div className="items-center justify-between text-xs text-gray-200">
+                    <div className="items-center justify-between text-xs text-navy-500">
                         Nome 
                     </div>
                   </th>
                   <th className="cursor-pointer pb-2 pr-4 pt-4 text-start dark:border-white/30">
-                    <div className="items-center justify-between text-xs text-gray-200">
+                    <div className="items-center justify-between text-xs text-navy-500">
                       Cargo 
                     </div>
                   </th>
-                  <th className="cursor-pointer pb-2 pr-4 pt-4 text-start dark:border-white/30">
-                    <div className="items-center justify-between text-xs text-gray-200">
+                  { hasPermissionInResource(myPermissionsContext.myPermissions, resource, ['manager', 'writer']) && <th className="cursor-pointer pb-2 pr-4 pt-4 text-start dark:border-white/30">
+                    <div className="items-center justify-between text-xs text-navy-500">
                       Ação 
                     </div>
-                  </th>
+                  </th>}
                 </tr>
               </thead>
               <tbody>
@@ -150,7 +165,7 @@ export default function Details ({resource}: {resource: ResourceExtended}) {
                             {Roles[permission.role]}
                           </p>
                         </td>
-                        <td className="flex justify-between divide-x mt-2">
+                        { hasPermissionInResource(myPermissionsContext.myPermissions, resource, ['manager', 'writer']) && <td className="flex justify-between divide-x mt-2">
                           <button 
                             onClick={() => modalOpenButton(permission)}
                             className="text-lg pr-2 font-medium text-gray-600 dark:text-white">
@@ -161,7 +176,7 @@ export default function Details ({resource}: {resource: ResourceExtended}) {
                             className="text-lg pl-2 font-medium text-gray-600 dark:text-white">
                             <FaRegTrashCan />
                           </button>
-                        </td>
+                        </td>}
                       </tr>
                     )
                   })
