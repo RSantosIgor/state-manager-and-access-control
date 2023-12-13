@@ -15,10 +15,6 @@ import { Resource, ResourceExtended } from "@/types/resource";
 import { ResourceList } from "./components/resourceList";
 import { ResourceContext } from "@/context/resourcesTree";
 
-export const metadata: Metadata = {
-  title: "Resources"
-}
-
 export default function Resources() {
 
   const [modalOpen, setModalOpen] = useState(false);

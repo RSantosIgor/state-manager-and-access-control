@@ -1,4 +1,3 @@
-"use client";
 import { Metadata } from "next";
 import Link from "next/link";
 import { redirect, usePathname } from "next/navigation";
@@ -6,10 +5,6 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { get } from '@/lib/localStorage/storage';
 import { user } from "@/models/auth";
-
-export const metadata: Metadata = {
-  title: "Authentication"
-}
 
 export default function Layout({
     signIn,
