@@ -2,11 +2,6 @@ import './globals.css'
 import type { Metadata } from 'next'
 import React from 'react';
 
-export const metadata: Metadata = {
-  title: 'State manager and access control',
-  description: 'State manager and access control app',
-}
-
 export default function RootLayout({
   children,
 }: {
