@@ -1,9 +1,8 @@
-import { Metadata } from "next";
+'use client'
 import Link from "next/link";
 import { redirect, usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { get } from '@/lib/localStorage/storage';
 import { user } from "@/models/auth";
 
 export default function Layout({
